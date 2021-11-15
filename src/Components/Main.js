@@ -2,10 +2,10 @@ import React, { useState } from 'react'
 import TruffleContract from 'truffle-contract'
 import Campaign from './../contracts/Campaign.json'
 import Web3 from 'web3'
-import {Button, Input, Form, Layout} from 'antd'
+import {Button, Input, Form, Layout, Card} from 'antd'
 const {Content} = Layout
 // import contract from 'truffle-contract';
-var web3 =  Moralis.enableWeb3();
+var web3 = new Web3();
 const provider = new web3.providers.HttpProvider("http://localhost:7545") 
 
 export const Main = () => {
@@ -20,18 +20,6 @@ export const Main = () => {
     let [donationAmount, setDonationAmount] = useState()
     let [cause, setCause] = useState('The Max Meuer needs a Yacht Foundation (MMNAYF)')
 
-
-
-    const doSomeThing = () => {
-        const msg = "Done :)"
-        addMessage(msg)
-    }
-
-
-    const addMessage = (msg) => {
-        setReturnMessages([...returnMessages, msg])
-    }
-
     const setupTruffelContract = (fromAdress) =>{
         var contract = TruffleContract(Campaign)
         contract.defaults({from:fromAdress})
@@ -43,7 +31,6 @@ export const Main = () => {
         e.preventDefault()
         var contract = setupTruffelContract(creatorAdress)
         // needs to be the Adress of the User Creating the Contract, Has to be defined !!  
-        
         const instance = await contract.new( 1234, receipientAddress)
         setContractAddress(instance.address)
     }
@@ -58,71 +45,55 @@ export const Main = () => {
 
     }
 
-    const buttonStyle = {
-        backgroundColor: 'grey',
-        width: '150px',
-        height: '50px',
-        lineHeight: '50px',
-        textAlign: 'center',
-        cursor: 'pointer',
-        marginTop: '20px'
-    }
-
-    const buttonContainerStyle = {
-        position: 'absolute',
-        top: '10vh',
-        left: 'calc(50vw - 75px)'
-    }
-
     return (
         <>
-            <Layout
-            >
-                <Content>
-                    <Button
-                        type="primary"
-                        onClick={() => setContractMask(true)}
-                    > Create Campaign</Button>
-                    {showContractMask &&
-                        <form onSubmit={(e) => handleSubmit(e)}>
-                            <label>What is the Cause of This Campaign
-                                <br/>
-                                {/* Not Part of the Contract Yet */}
-                                <Input value={cause} onChange={(e) => setCause(e.target.vlaue)}/>
-                            </label>
-                            <br/>
-                            <label>Set the Adress of the Receipient
-                                <br/>
-                                <Input value={receipientAddress} onChange={(e) => setReceipient(e.target.vlaue)}/>
-                            </label>
-                            <br/>
-                            <label>Set the Duration of the campaign
-                            <br/>
-                                <Input onChange={(e) => setDuration(e.target.value)}/> 
-                            </label>
-                            <Input type="submit" value="Submit" />
-                        </form>
+            <Content style={{ padding: '0 100px' }}>
+                {showContractMask ?
+                    <Form >
+                        <Form.Item label="What is the Cause of This Campaign">
+                            {/* Not Part of the Contract Yet */}
+                            <Input value={cause} onChange={(e) => setCause(e.target.vlaue)}/>
+                        </Form.Item>
+                        <Form.Item label="Set the Adress of the Receipient">
+                            <Input value={receipientAddress} onChange={(e) => setReceipient(e.target.vlaue)}/>
+                        </Form.Item>
+                        <Form.Item label="Set the Duration of the campaign" >
+                            <Input onChange={(e) => setDuration(e.target.value)}/> 
+                        </Form.Item>
+                        <Form.Item>
+                            <Button type="submit" value="Submit" onClick={(e) => handleSubmit(e)}>Submit</Button>
+                        </Form.Item>
+                    </Form>
+                    :
 
-                    }
-                    {contractAddress && 
-                        <form onSubmit={(e) => handleDonation(e)}>
-                        <label>Donate now to the Max Meuer needs a yacht foundation 
+                    <Card >
+                        <Button
+                            centered={true}
+                            type="primary"
+                            onClick={() => setContractMask(true)}
+                        > Create Campaign</Button>
+                    </Card>
+                }
+                {contractAddress && 
+                    <Form onSubmit={(e) => handleDonation(e)}>
+                        <Form.Item>Donate now to the Max Meuer needs a yacht foundation 
                             <Input onChange={(e) => setDonationAmount(e.target.value)}/>
-                        </label>
-                        <Input type="submit" value="Submit" />
-                    </form>
+                            <Button  type="submit" value="Submit" />
+                        </Form.Item>
+                    </Form>
+                }
+                <Card>
+                <Button
+                    type="primary"
+                    onClick={() => setShowCampaigns(true)}
+                > 
+                    See Available Campaigns
+                </Button>
+                </Card>
+                    {showCampaigns && 
+                    <div>HUUH</div>
                     }
-                    <Button
-                        type="primary"
-                        onClick={() => setShowCampaigns(true)}
-                    > 
-                        See Available Campaigns
-                    </Button>
-                        {showCampaigns && 
-                        <iv>HUUHU</div>
-                        }
-                </Content>
-            </Layout>
+            </Content>
         </>
     )
 }
