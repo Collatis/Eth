@@ -2,11 +2,17 @@ import React, { useState } from 'react'
 import TruffleContract from 'truffle-contract'
 import Campaign from './../contracts/Campaign.json'
 import Web3 from 'web3'
-import {Button, Input, Form, Layout, Card} from 'antd'
-const {Content} = Layout
+import { Button, Input, Form, Layout, Card } from 'antd'
+import Moralis from 'moralis'
+const { Content } = Layout
 // import contract from 'truffle-contract';
 var web3 = new Web3();
-const provider = new web3.providers.HttpProvider("http://localhost:7545") 
+const provider = new web3.providers.HttpProvider("http://localhost:7545")
+
+// Moralis
+const moralisServerUrl = "https://dnw6c3v77ahg.usemoralis.com:2053/server"
+const moralisAppId = "RC8zJRpeRV5MdzR4pSbCEpnqBXNUgh7npI6sFJAa"
+Moralis.start({ serverUrl: moralisServerUrl, appId: moralisAppId })
 
 export const Main = () => {
 
@@ -16,32 +22,32 @@ export const Main = () => {
     let [donorAddress, setDonorAddress] = useState("0x32f17d2caAe07E782e947E089172DCA0911dccE3")
     let [duration, setDuration] = useState()
     let [showCampaigns, setShowCampaigns] = useState(false)
-    let [contractAddress, setContractAddress] = useState()
+    let [contractAddress, setContractAddress] = useState(1)
     let [donationAmount, setDonationAmount] = useState()
     let [cause, setCause] = useState('The Max Meuer needs a Yacht Foundation (MMNAYF)')
 
-    const setupTruffelContract = (fromAdress) =>{
+    const setupTruffelContract = (fromAdress) => {
         var contract = TruffleContract(Campaign)
-        contract.defaults({from:fromAdress})
+        contract.defaults({ from: fromAdress })
         contract.setProvider(provider)
         return contract
     }
-    
-    const handleSubmit = async (e) =>{
+
+    const handleSubmit = async (e) => {
         e.preventDefault()
         var contract = setupTruffelContract(creatorAdress)
         // needs to be the Adress of the User Creating the Contract, Has to be defined !!  
-        const instance = await contract.new( 1234, receipientAddress)
+        const instance = await contract.new(1234, receipientAddress)
         setContractAddress(instance.address)
     }
 
-    const handleDonation = async (e) =>{
+    const handleDonation = async (e) => {
         e.preventDefault()
         var contract = setupTruffelContract(donorAddress)
-        
+
         let instance = await contract.at(contractAddress);
         console.log(donationAmount);
-        instance.donate({value: web3.utils.toWei(donationAmount, 'ether')})
+        instance.donate({ value: web3.utils.toWei(donationAmount, 'ether') })
 
     }
 
@@ -52,16 +58,16 @@ export const Main = () => {
                     <Form >
                         <Form.Item label="What is the Cause of This Campaign">
                             {/* Not Part of the Contract Yet */}
-                            <Input value={cause} onChange={(e) => setCause(e.target.vlaue)}/>
+                            <Input value={cause} onChange={(e) => setCause(e.target.vlaue)} />
                         </Form.Item>
                         <Form.Item label="Set the Adress of the Receipient">
-                            <Input value={receipientAddress} onChange={(e) => setReceipient(e.target.vlaue)}/>
+                            <Input value={receipientAddress} onChange={(e) => setReceipient(e.target.vlaue)} />
                         </Form.Item>
                         <Form.Item label="Set the Duration of the campaign" >
-                            <Input onChange={(e) => setDuration(e.target.value)}/> 
+                            <Input onChange={(e) => setDuration(e.target.value)} />
                         </Form.Item>
                         <Form.Item>
-                            <Button type="submit" value="Submit" onClick={(e) => handleSubmit(e)}>Submit</Button>
+                            <Button type="submit" onClick={(e) => handleSubmit(e)}>Submit</Button>
                         </Form.Item>
                     </Form>
                     :
@@ -74,25 +80,27 @@ export const Main = () => {
                         > Create Campaign</Button>
                     </Card>
                 }
-                {contractAddress && 
-                    <Form onSubmit={(e) => handleDonation(e)}>
-                        <Form.Item>Donate now to the Max Meuer needs a yacht foundation 
-                            <Input onChange={(e) => setDonationAmount(e.target.value)}/>
-                            <Button  type="submit" value="Submit" />
+                {contractAddress &&
+                    <Form >
+                        <Form.Item>Donate now to the Max Meuer needs a yacht foundation
+                            <Input onChange={(e) => setDonationAmount(e.target.value)} />
+                        </Form.Item>
+                        <Form.Item>
+                            <Button type="submit" onClick={(e) => handleDonation(e)}>Donate</Button>
                         </Form.Item>
                     </Form>
                 }
                 <Card>
-                <Button
-                    type="primary"
-                    onClick={() => setShowCampaigns(true)}
-                > 
-                    See Available Campaigns
-                </Button>
+                    <Button
+                        type="primary"
+                        onClick={() => setShowCampaigns(true)}
+                    >
+                        See Available Campaigns
+                    </Button>
                 </Card>
-                    {showCampaigns && 
+                {showCampaigns &&
                     <div>HUUH</div>
-                    }
+                }
             </Content>
         </>
     )

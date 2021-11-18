@@ -1,12 +1,15 @@
-import logo from './logo.svg';
 import './App.css';
-import {Main} from "./Components/Main"
+import { Main } from "./Components/Main"
+import { Login } from "./Components/Login"
 
 
 function App() {
 
   return (
-    <Main></Main>
+    <>
+      <Login></Login>
+      <Main></Main>
+    </>
   );
 }
 
