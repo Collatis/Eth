@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity >=0.4.22 <0.8.0;
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "@chainlink/contracts/src/v0.5/interfaces/AggregatorV3Interface.sol";
 
 
 contract Campaign {
@@ -9,7 +9,7 @@ contract Campaign {
     uint256 public expiration_date;
     AggregatorV3Interface internal priceFeed;
 
-    // uint public goal;
+    int public goal;
 
     // error AuctionAlreadyEnded();
 
