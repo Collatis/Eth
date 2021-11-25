@@ -1,33 +1,15 @@
 import React, { useState } from 'react'
-import axios from 'axios'
-import Campaign from './../contracts/Campaign.json'
-import TruffleContract from 'truffle-contract'
-import { useMoralis, useNewMoralisObject, useMoralisFile } from 'react-moralis'
-import { Button, Input, Form, Layout, Card, message, Upload } from 'antd'
-import uuid from "uuid"
-import { InboxOutlined, PlusOutlined } from '@ant-design/icons'
-const { Dragger } = Upload
+import { CampaignABI, CampaignBytes } from './../contracts/Campaign'
+import { useMoralis, useNewMoralisObject } from 'react-moralis'
+import { Button, Input, Form, Card, Upload } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
 
 export const CreateCampaignCard = () => {
-
+    const [form] = Form.useForm();
     const { Moralis, user, web3 } = useMoralis();
     const { save: saveCampaign } = useNewMoralisObject("Campaign")
-    const { save: saveNFT_Metadata } = useNewMoralisObject("NFT_Metadata")
-
-    const {
-        error,
-        isUploading,
-        moralisFile,
-        saveFile,
-    } = useMoralisFile()
-
-    let [userAddress, _] = useState(user.get('ethAddress'))
     let [showContractMask, setContractMask] = useState(false)
-    let [cause, setCause] = useState('The Max Meuer needs a Yacht Foundation (MMNAYF)')
-    let [description, setDescription] = useState('So Far Max Meuer does not have a yacht. But he really needs one. So Pleas, give him Money.')
-    let [receipientAddress, setReceipient] = useState("0x3886E559cCDd8f9505FfE71179Afe64d19d0374C")
-    let [campaignGoal, setCampaignGoal] = useState("2")
-    let [campaignDuration, setCampaignDuration] = useState("11220")
+    let [submitLoading, setSubmitLoading] = useState(false)
     let [NFTFiles, setNFTFiles] = useState([])
 
     const getId = (length) => {
@@ -42,12 +24,13 @@ export const CreateCampaignCard = () => {
     }
 
     const instanciateContract = () => {
-        var contract = new TruffleContract(Campaign)
-        contract.setProvider(web3.currentProvider)
+        let contract = new web3.eth.Contract(CampaignABI)
+        contract.setProvider(web3.currentProvider);
         return contract
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async ({ cause, description, duration, goal, receipient }) => {
+        setSubmitLoading(true)
         let paddedHex = getId(64)
 
         // upload the png
@@ -56,78 +39,108 @@ export const CreateCampaignCard = () => {
         await moralisFile.saveIPFS()
         console.log("moralisFile", moralisFile)
         let image_url = moralisFile._ipfs
-        console.log("image_url", image_url)
-        // console.log(image_CID)
 
-        //upload metadata
-        let nftMetadata = {
+        // upload metadata
+        const metadata = {
             name: cause,
             description: description,
-            image: image_url,
-            nftId: paddedHex
+            image: image_url
         }
-        saveNFT_Metadata(nftMetadata)
+        const metaDataFile = new Moralis.File(
+            `${paddedHex}.json`,
+            { base64: btoa(JSON.stringify(metadata)) })
+        await metaDataFile.saveIPFS()
+        let meta_url = metaDataFile._ipfs
+        console.log("meta_url", meta_url)
 
-        // return metadata by useing GET: https://dnw6c3v77ahg.usemoralis.com:2053/server/functions/getNFT?_ApplicationId=RC8zJRpeRV5MdzR4pSbCEpnqBXNUgh7npI6sFJAa&id=6837914930984095715274442178749360054362109603603214733682723680
-
-
+        // deploy contract
         var contract = instanciateContract()
-        contract.defaults({ from: userAddress })
-
-        const instance = await contract.new(campaignDuration, receipientAddress, campaignGoal, paddedHex)
-        console.log(instance.address)
-        saveCampaign({
-            userAddress,
-            receipientAddress,
-            contractAddress: instance.address,
-            cause,
-            campaignDuration,
-            campaignGoal,
-            nftId: paddedHex,
-            image: image_url,
+        web3.eth.defaultAccount = user.get("ethAddress")
+        const instance = await contract.deploy({
+            data: CampaignBytes,
+            arguments: [duration, receipient, goal, paddedHex, meta_url]
+        }).send({
+            from: user.get("ethAddress"),
         })
+
+
+        saveCampaign({
+            userAddress: user.get('ethAddress'),
+            receipientAddress: receipient,
+            contractAddress: instance._address,
+            cause,
+            campaignDuration: duration,
+            campaignGoal: goal,
+            nftId: paddedHex,
+            metadataUrl: meta_url,
+            imageUrl: image_url
+        })
+        setSubmitLoading(false)
+        setContractMask(false)
     }
 
     return (
         <>
-            {console.log("filelist", NFTFiles)}
+            {console.log(form, NFTFiles)}
             {showContractMask ?
                 <Card >
-                    <Form >
-                        <Form.Item label="What is the Cause of This Campaign">
-                            {/* Not Part of the Contract Yet */}
-                            <Input value={cause} onChange={(e) => setCause(e.target.value)} />
+                    <Form
+                        name="basic"
+                        labelCol={{ span: 8 }}
+                        wrapperCol={{ span: 16 }}
+                        initialValues={{ remember: true }}
+                        onFinish={handleSubmit}
+                        onFinishFailed={console.log}
+                        autoComplete="off"
+                    >
+                        <Form.Item
+                            label="What is the Cause of This Campaign"
+                            name="cause"
+                            rules={[{ required: true, message: 'Please input the cause of the Campaign!' }]}>
+                            <Input />
                         </Form.Item>
-                        <Form.Item label="Descriptions">
-                            {/* Not Part of the Contract Yet */}
-                            <Input value={description} onChange={(e) => setDescription(e.target.value)} />
+                        <Form.Item
+                            label="Descriptions"
+                            name="description"
+                            rules={[{ required: true, message: 'Please input your description!' }]}>
+                            <Input />
                         </Form.Item>
-                        <Form.Item label="Set the Adress of the Receipient">
-                            <Input value={receipientAddress} onChange={(e) => setReceipient(e.target.value)} />
+                        <Form.Item
+                            rules={[{ required: true, message: 'Please input the receipient!' }]}
+                            label="Set the Adress of the Receipient"
+                            name="receipient">
+                            <Input />
                         </Form.Item>
-                        <Form.Item label="Set the Fianancial Goal of the Campaign">
-                            <Input value={campaignGoal} onChange={(e) => setCampaignGoal(e.target.value)} />
+                        <Form.Item
+                            rules={[{ required: true, message: 'Please input your goal!' }]}
+                            label="Set the Fianancial Goal of the Campaign"
+                            name="goal">
+                            <Input />
                         </Form.Item>
-                        <Form.Item label="Set the Duration of the campaign" >
-                            <Input value={campaignDuration} onChange={(e) => setCampaignDuration(e.target.value)} />
+                        <Form.Item
+                            rules={[{ required: true, message: 'Please input the duration!' }]}
+                            label="Set the Duration of the campaign"
+                            name="duration" >
+                            <Input />
                         </Form.Item>
-                        <Form.Item label="Upload png for your NFT" >
+                        <Form.Item
+                            rules={[{ required: true, message: 'Please input your png!' }]}
+                            label="Upload png for your NFT"
+                            name="png">
                             <Upload
-                                fileList={NFTFiles}
-                                onChange={({ fileList }) => setNFTFiles(fileList)}
                                 listType="picture-card"
+                                onChange={(uploader) => setNFTFiles(uploader.fileList)}
                                 beforeUpload
                                 accept={[".png"]}
                             >
-                                {NFTFiles.length < 1 &&
-                                    <div>
-                                        <PlusOutlined />
-                                        <div style={{ marginTop: 8 }}>Upload</div>
-                                    </div>}
+                                {NFTFiles.length < 1 && <div>
+                                    <PlusOutlined />
+                                    <div style={{ marginTop: 8 }}>Upload</div>
+                                </div>}
                             </Upload>
                         </Form.Item>
                         <Form.Item>
-                            <Button type="submit" onClick={(e) => handleSubmit(e)}>Submit</Button>
+                            <Button htmlType="submit" loading={submitLoading}>Submit </Button>
                         </Form.Item>
                     </Form>
                 </Card>
@@ -137,7 +150,7 @@ export const CreateCampaignCard = () => {
                         centered={true}
                         type="primary"
                         onClick={() => setContractMask(true)}
-                    > Create Campaign</Button>
+                    > Create Campaign </Button>
                 </Card>
             }
         </>

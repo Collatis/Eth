@@ -1,20 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.0;
+pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.5/interfaces/AggregatorV3Interface.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 contract Campaign is ERC1155 {
     address payable public receipient;
     uint256 public expiration_date;
     AggregatorV3Interface internal priceFeed;
-
     uint256 public goal;
-
     uint256 public donations = 0;
-
     uint256 public nftId;
-
-    // error AuctionAlreadyEnded();
+    string public set_uri;
+    string public name = "The Donation Project";
 
     event DonationSend(address donor, uint256 amount, uint256 nftId);
     event DonationEnded(address receipient, uint256 amount);
@@ -23,19 +20,17 @@ contract Campaign is ERC1155 {
         uint256 init_duration,
         address payable receipient_adress,
         uint256 init_goal,
-        uint256 init_nftId
-    )
-        ERC1155(
-            "https://dnw6c3v77ahg.usemoralis.com:2053/server/functions/getNFT?_ApplicationId=RC8zJRpeRV5MdzR4pSbCEpnqBXNUgh7npI6sFJAa&id={id}"
-        )
-    {
+        uint256 init_nftId,
+        string memory init_uri
+    ) ERC1155(init_uri) {
         receipient = receipient_adress;
         goal = init_goal;
         nftId = init_nftId;
+        set_uri = init_uri;
+        expiration_date = block.timestamp + init_duration;
         priceFeed = AggregatorV3Interface(
             0x9326BFA02ADD2366b30bacB125260Af641031331
         );
-        expiration_date = block.timestamp + init_duration;
     }
 
     function donate() public payable {
@@ -78,5 +73,14 @@ contract Campaign is ERC1155 {
             revert("Donation Campaign has not Ended Yet");
         emit DonationEnded(receipient, address(this).balance);
         receipient.transfer(address(this).balance);
+    }
+
+    function uri(uint256 _tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        return set_uri;
     }
 }

@@ -3,11 +3,8 @@ import './App.css'
 import { Main } from "./Components/Main"
 import { useMoralis } from "react-moralis"
 
-
-
-
 function App() {
-  const { authenticate, web3, isWeb3Enabled, enableWeb3, isAuthenticated, isWeb3EnableLoading } =
+  const { authenticate, isWeb3Enabled, enableWeb3, isAuthenticated, isWeb3EnableLoading } =
     useMoralis();
   // const provider  =   detectEthereumProvider();
   // console.log(provider)
