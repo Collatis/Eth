@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.4.22 <0.8.0;
+pragma solidity ^0.8.7;
 import "@chainlink/contracts/src/v0.5/interfaces/AggregatorV3Interface.sol";
 
 contract Campaign {

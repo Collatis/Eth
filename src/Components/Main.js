@@ -80,15 +80,17 @@ export const Main = () => {
         let contractInstance = await contract.at(e);
         let price = await contractInstance.getLatestPrice()
         console.log(price)
-        let balance = await contractInstance.getBalance()
-        console.log(balance);
+        // let price = await contractInstance.getLatestPrice()
+        // console.log(price)
+        // let balance = await contractInstance.getBalance()
+        // console.log(balance);
         // return <div>asdfasdf</div>
     }
 
     const handleDonation = async (e) => {
         // var contract = setupTruffelContract(donorAddress)
         var instance = instanciateContract()
-        let campaign = await instance.at('0x6cBD4185Dc929c336FA4d6de6c71A05e4F73c08B');
+        let campaign = await instance.at('0xc5bb795e011a0A6578aEDC7F9C830A634DcB24ff');
         campaign.donate({ from: userAddress, value: web3.utils.toWei(donationAmount, 'ether') })
 
     }
@@ -142,9 +144,9 @@ export const Main = () => {
                                 <Card key={i} title={c.attributes.cause} extra={<a href="#">Donate</a>} style={{ width: 300 }}>
                                     <p>{c.attributes.cause}</p>
                                     <p>{c.attributes.duration}</p>
-                                    {c.attributes.contractAddress !== undefined &&
+                                    {/* {c.attributes.contractAddress !== undefined &&
                                         getBalance(c.attributes.contractAddress)
-                                    }
+                                    } */}
                                     {/* {getBalance(c.attributes.contractAddress)} */}
                                     <div>{c.attributes.receipientAddress}</div>
                                 </Card>
@@ -166,14 +168,14 @@ export const Main = () => {
                         }
                     </>
                 }
-                {/* // <Form >
-                //     <Form.Item>Donate now to the Max Meuer needs a yacht foundation
-                //         <Input onChange={(e) => setDonationAmount(e.target.value)} />
-                //     </Form.Item>
-                //     <Form.Item>
-                //         <Button type="submit" onClick={(e) => handleDonation(e)}>Donate</Button>
-                //     </Form.Item>
-                // </Form> */}
+                <Form >
+                    <Form.Item>Donate now to the Max Meuer needs a yacht foundation
+                       <Input onChange={(e) => setDonationAmount(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="submit" onClick={(e) => handleDonation(e)}>Donate</Button>
+                    </Form.Item>
+                </Form>
             </Content>
         </>
     )
