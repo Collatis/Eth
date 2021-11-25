@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { CampaignABI } from './../contracts/Campaign'
 import { useMoralis } from 'react-moralis'
-import { Card, Input, Button } from 'antd'
+import { Card, Input, Button, message } from 'antd'
 const { Meta } = Card;
 
 export const CampaignCard = ({ data }) => {
@@ -24,13 +24,18 @@ export const CampaignCard = ({ data }) => {
 
     const handleDonation = async () => {
         setSubmitLoading(true)
-        let campaign = instanciateContract()
-        console.log(data.attributes)
-        campaign.options.address = data.attributes.contractAddress
-        await campaign.methods.donate().send({
-            from: user.get("ethAddress"),
-            value: web3.utils.toWei(donationAmount, 'ether')
-        })
+        console.log("handling donation")
+        try {
+            let campaign = instanciateContract()
+            campaign.options.address = data.attributes.contractAddress
+            await campaign.methods.donate().send({
+                from: user.get("ethAddress"),
+                value: web3.utils.toWei(donationAmount, 'ether')
+            })
+            message.info("Thank you for donationg!")
+        } catch (error) {
+            message.error("Somthing went wrong sorry :(")
+        }
         setSubmitLoading(false)
 
     }
@@ -50,7 +55,6 @@ export const CampaignCard = ({ data }) => {
                 </Input.Group>
             ]}
         >
-            {console.log("donationAmount", donationAmount)}
             <Meta
                 title={data.attributes.cause}
                 description={<>

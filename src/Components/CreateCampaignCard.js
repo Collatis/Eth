@@ -95,7 +95,6 @@ export const CreateCampaignCard = () => {
                         wrapperCol={{ span: 16 }}
                         initialValues={{ remember: true }}
                         onFinish={handleSubmit}
-                        onFinishFailed={console.log}
                         autoComplete="off"
                     >
                         <Form.Item
