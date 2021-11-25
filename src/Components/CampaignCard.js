@@ -8,6 +8,7 @@ export const CampaignCard = ({ data }) => {
 
     const { user, web3 } = useMoralis();
     const [donationAmount, setDonationAmount] = useState("0.01")
+    const [submitLoading, setSubmitLoading] = useState(false)
 
     const instanciateContract = () => {
         let contract = new web3.eth.Contract(CampaignABI, data.attributes.contractAddress)
@@ -22,13 +23,15 @@ export const CampaignCard = ({ data }) => {
     }
 
     const handleDonation = async () => {
+        setSubmitLoading(true)
         let campaign = instanciateContract()
         console.log(data.attributes)
         campaign.options.address = data.attributes.contractAddress
-        campaign.methods.donate().send({
+        await campaign.methods.donate().send({
             from: user.get("ethAddress"),
             value: web3.utils.toWei(donationAmount, 'ether')
         })
+        setSubmitLoading(false)
 
     }
 
@@ -39,7 +42,11 @@ export const CampaignCard = ({ data }) => {
             actions={[
                 <Input.Group compact>
                     <Input style={{ width: 'calc(100% - 200px)' }} value={donationAmount} onChange={(e) => setDonationAmount(e.target.value)} />
-                    <Button type="primary" onClick={handleDonation}>Donate</Button>
+                    <Button
+                        type="primary"
+                        onClick={handleDonation}
+                        loading={submitLoading}
+                    >Donate</Button>
                 </Input.Group>
             ]}
         >

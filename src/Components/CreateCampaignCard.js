@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { CampaignABI, CampaignBytes } from './../contracts/Campaign'
 import { useMoralis, useNewMoralisObject } from 'react-moralis'
-import { Button, Input, Form, Card, Upload } from 'antd'
+import { Button, Input, Form, Card, Upload, message } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 
 export const CreateCampaignCard = () => {
@@ -31,50 +31,55 @@ export const CreateCampaignCard = () => {
 
     const handleSubmit = async ({ cause, description, duration, goal, receipient }) => {
         setSubmitLoading(true)
-        let paddedHex = getId(64)
+        try {
+            let paddedHex = getId(64)
 
-        // upload the png
-        const moralisFile = new Moralis.File(`${paddedHex}.png`,
-            NFTFiles[0].originFileObj, "image/png")
-        await moralisFile.saveIPFS()
-        console.log("moralisFile", moralisFile)
-        let image_url = moralisFile._ipfs
+            // upload the png
+            const moralisFile = new Moralis.File(`${paddedHex}.png`,
+                NFTFiles[0].originFileObj, "image/png")
+            await moralisFile.saveIPFS()
+            console.log("moralisFile", moralisFile)
+            let image_url = moralisFile._ipfs
 
-        // upload metadata
-        const metadata = {
-            name: cause,
-            description: description,
-            image: image_url
+            // upload metadata
+            const metadata = {
+                name: cause,
+                description: description,
+                image: image_url
+            }
+            const metaDataFile = new Moralis.File(
+                `${paddedHex}.json`,
+                { base64: btoa(JSON.stringify(metadata)) })
+            await metaDataFile.saveIPFS()
+            let meta_url = metaDataFile._ipfs
+            console.log("meta_url", meta_url)
+
+            // deploy contract
+            var contract = instanciateContract()
+            web3.eth.defaultAccount = user.get("ethAddress")
+            const instance = await contract.deploy({
+                data: CampaignBytes,
+                arguments: [duration, receipient, goal, paddedHex, meta_url]
+            }).send({
+                from: user.get("ethAddress"),
+            })
+
+
+            saveCampaign({
+                userAddress: user.get('ethAddress'),
+                receipientAddress: receipient,
+                contractAddress: instance._address,
+                cause,
+                campaignDuration: duration,
+                campaignGoal: goal,
+                nftId: paddedHex,
+                metadataUrl: meta_url,
+                imageUrl: image_url
+            })
+        } catch (error) {
+            message.error("Somthing went wrong sorry :(")
         }
-        const metaDataFile = new Moralis.File(
-            `${paddedHex}.json`,
-            { base64: btoa(JSON.stringify(metadata)) })
-        await metaDataFile.saveIPFS()
-        let meta_url = metaDataFile._ipfs
-        console.log("meta_url", meta_url)
 
-        // deploy contract
-        var contract = instanciateContract()
-        web3.eth.defaultAccount = user.get("ethAddress")
-        const instance = await contract.deploy({
-            data: CampaignBytes,
-            arguments: [duration, receipient, goal, paddedHex, meta_url]
-        }).send({
-            from: user.get("ethAddress"),
-        })
-
-
-        saveCampaign({
-            userAddress: user.get('ethAddress'),
-            receipientAddress: receipient,
-            contractAddress: instance._address,
-            cause,
-            campaignDuration: duration,
-            campaignGoal: goal,
-            nftId: paddedHex,
-            metadataUrl: meta_url,
-            imageUrl: image_url
-        })
         setSubmitLoading(false)
         setContractMask(false)
     }
