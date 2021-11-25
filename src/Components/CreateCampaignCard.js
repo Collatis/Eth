@@ -38,7 +38,6 @@ export const CreateCampaignCard = () => {
             const moralisFile = new Moralis.File(`${paddedHex}.png`,
                 NFTFiles[0].originFileObj, "image/png")
             await moralisFile.saveIPFS()
-            console.log("moralisFile", moralisFile)
             let image_url = moralisFile._ipfs
 
             // upload metadata
@@ -52,7 +51,6 @@ export const CreateCampaignCard = () => {
                 { base64: btoa(JSON.stringify(metadata)) })
             await metaDataFile.saveIPFS()
             let meta_url = metaDataFile._ipfs
-            console.log("meta_url", meta_url)
 
             // deploy contract
             var contract = instanciateContract()
@@ -86,7 +84,6 @@ export const CreateCampaignCard = () => {
 
     return (
         <>
-            {console.log(form, NFTFiles)}
             {showContractMask ?
                 <Card >
                     <Form
