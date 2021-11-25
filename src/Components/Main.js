@@ -1,7 +1,7 @@
 import React from 'react'
 import { CreateCampaignCard } from './CreateCampaignCard'
 import { useMoralisQuery } from 'react-moralis'
-import { Layout, Row, Col } from 'antd'
+import { Layout, Row } from 'antd'
 import { CampaignCard } from './CampaignCard'
 const { Content } = Layout
 

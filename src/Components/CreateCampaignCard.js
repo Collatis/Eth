@@ -1,14 +1,13 @@
 import React, { useState } from 'react'
 import { CampaignABI, CampaignBytes } from './../contracts/Campaign'
 import { useMoralis, useNewMoralisObject } from 'react-moralis'
-import { Button, Input, Form, Card, Upload, message } from 'antd'
+import { Button, Input, Form, Upload, message, Modal } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 
 export const CreateCampaignCard = () => {
-    const [form] = Form.useForm();
     const { Moralis, user, web3 } = useMoralis();
     const { save: saveCampaign } = useNewMoralisObject("Campaign")
-    let [showContractMask, setContractMask] = useState(false)
+    let [showContractMask, setShowContractMask] = useState(false)
     let [submitLoading, setSubmitLoading] = useState(false)
     let [NFTFiles, setNFTFiles] = useState([])
 
@@ -76,84 +75,91 @@ export const CreateCampaignCard = () => {
             })
         } catch (error) {
             message.error("Somthing went wrong sorry :(")
+            console.log(error)
+            setNFTFiles([])
         }
 
         setSubmitLoading(false)
-        setContractMask(false)
+        setShowContractMask(false)
     }
 
     return (
         <>
-            {showContractMask ?
-                <Card >
-                    <Form
-                        name="basic"
-                        labelCol={{ span: 8 }}
-                        wrapperCol={{ span: 16 }}
-                        initialValues={{ remember: true }}
-                        onFinish={handleSubmit}
-                        autoComplete="off"
-                    >
-                        <Form.Item
-                            label="What is the Cause of This Campaign"
-                            name="cause"
-                            rules={[{ required: true, message: 'Please input the cause of the Campaign!' }]}>
-                            <Input />
-                        </Form.Item>
-                        <Form.Item
-                            label="Descriptions"
-                            name="description"
-                            rules={[{ required: true, message: 'Please input your description!' }]}>
-                            <Input />
-                        </Form.Item>
-                        <Form.Item
-                            rules={[{ required: true, message: 'Please input the receipient!' }]}
-                            label="Set the Adress of the Receipient"
-                            name="receipient">
-                            <Input />
-                        </Form.Item>
-                        <Form.Item
-                            rules={[{ required: true, message: 'Please input your goal!' }]}
-                            label="Set the Fianancial Goal of the Campaign"
-                            name="goal">
-                            <Input />
-                        </Form.Item>
-                        <Form.Item
-                            rules={[{ required: true, message: 'Please input the duration!' }]}
-                            label="Set the Duration of the campaign"
-                            name="duration" >
-                            <Input />
-                        </Form.Item>
-                        <Form.Item
-                            rules={[{ required: true, message: 'Please input your png!' }]}
-                            label="Upload png for your NFT"
-                            name="png">
-                            <Upload
-                                listType="picture-card"
-                                onChange={(uploader) => setNFTFiles(uploader.fileList)}
-                                beforeUpload
-                                accept={[".png", ".gif"]}
-                            >
-                                {NFTFiles.length < 1 && <div>
-                                    <PlusOutlined />
-                                    <div style={{ marginTop: 8 }}>Upload</div>
-                                </div>}
-                            </Upload>
-                        </Form.Item>
-                        <Form.Item>
-                            <Button htmlType="submit" loading={submitLoading}>Submit </Button>
-                        </Form.Item>
-                    </Form>
-                </Card>
-                :
-                <Card >
-                    <Button
-                        centered={true}
-                        type="primary"
-                        onClick={() => setContractMask(true)}
-                    > Create Campaign </Button>
-                </Card>
-            }
+
+            <Button
+                centered={true}
+                type="primary"
+                onClick={() => setShowContractMask(true)}
+            > Create Campaign </Button>
+            <Modal
+                title="Create a Campaign"
+                visible={showContractMask}
+                okButtonProps={{ htmlType: "submit" }}
+                footer={[
+                    <Button >Cancle </Button>,
+                    <Button type={"primary"} form="createCampaignForm" htmlType="submit" loading={submitLoading}>Ok</Button>
+                ]}
+                onCancel={() => setShowContractMask(false)}
+                width={1000}
+            >
+                <Form
+                    id="createCampaignForm"
+                    name="basic"
+                    labelCol={{ span: 8 }}
+                    wrapperCol={{ span: 16 }}
+                    initialValues={{ remember: true }}
+                    onFinish={handleSubmit}
+                    autoComplete="off"
+                >
+                    <Form.Item
+                        label="What is the Cause of This Campaign"
+                        name="cause"
+                        rules={[{ required: true, message: 'Please input the cause of the Campaign!' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="Descriptions"
+                        name="description"
+                        rules={[{ required: true, message: 'Please input your description!' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        rules={[{ required: true, message: 'Please input the receipient!' }]}
+                        label="Set the Adress of the Receipient"
+                        name="receipient">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        rules={[{ required: true, message: 'Please input your goal!' }]}
+                        label="Set the Fianancial Goal of the Campaign"
+                        name="goal">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        rules={[{ required: true, message: 'Please input the duration!' }]}
+                        label="Set the Duration of the campaign"
+                        name="duration" >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        rules={[{ required: true, message: 'Please input your png!' }]}
+                        label="Upload png for your NFT"
+                        name="png">
+                        <Upload
+                            listType="picture-card"
+                            onChange={(uploader) => setNFTFiles(uploader.fileList)}
+                            beforeUpload
+                            accept={[".png", ".gif"]}
+                        >
+                            {NFTFiles.length < 1 && <div>
+                                <PlusOutlined />
+                                <div style={{ marginTop: 8 }}>Upload</div>
+                            </div>}
+                        </Upload>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
         </>
     )
 }
