@@ -41,11 +41,15 @@ export const CampaignCard = ({ data }) => {
 
     return (
         <Card
-            style={{ width: 500 }}
-            cover={<img alt="nft" src={data.attributes.imageUrl} />}
+            hoverable
+            style={{ width: 400 }}
+            cover={
+                <div style={{ height: 550, margin: "auto", overflow: "hidden" }}>
+                    <img style={{ width: 400 }} alt="nft" src={data.attributes.imageUrl} />
+                </div>}
             actions={[
                 <Input.Group compact>
-                    <Input style={{ width: 'calc(100% - 200px)' }} value={donationAmount} onChange={(e) => setDonationAmount(e.target.value)} />
+                    <Input style={{ width: 'calc(100% - 100px)' }} value={donationAmount} onChange={(e) => setDonationAmount(e.target.value)} />
                     <Button
                         type="primary"
                         onClick={handleDonation}
@@ -60,7 +64,6 @@ export const CampaignCard = ({ data }) => {
                     <p>Countdown: {getCountdown()} Min.</p>
                     <p>Receipient: {data.attributes.receipientAddress}</p>
                     <p>Contract: {data.attributes.contractAddress}</p>
-                    <p>Meta: {data.attributes.metadataUrl}</p>
                 </>
                 }
             />

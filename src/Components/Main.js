@@ -1,7 +1,7 @@
 import React from 'react'
 import { CreateCampaignCard } from './CreateCampaignCard'
 import { useMoralisQuery } from 'react-moralis'
-import { Layout } from 'antd'
+import { Layout, Row, Col } from 'antd'
 import { CampaignCard } from './CampaignCard'
 const { Content } = Layout
 
@@ -35,10 +35,15 @@ export const Main = () => {
             {campaigns &&
                 <>
                     <h1>Running</h1>
-                    {campaigns.filter(checkIfRunning).map((c, i) => <CampaignCard data={c} />)}
+                    <Row >
+                        {campaigns.filter(checkIfRunning).map((c, i) => <div style={{ margin: '10px' }}><CampaignCard data={c} /></div>)}
+                    </Row>
+
 
                     <h1>Not Running</h1>
-                    {campaigns.filter((c) => !checkIfRunning(c)).map((c, i) => <CampaignCard data={c} />)}
+                    <Row >
+                        {campaigns.filter((c) => !checkIfRunning(c)).map((c, i) => <div style={{ margin: '10px' }}><CampaignCard data={c} /></div>)}
+                    </Row>
                 </>
             }
         </Content >
