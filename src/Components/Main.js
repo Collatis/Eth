@@ -1,7 +1,7 @@
 import React from 'react'
 import { CreateCampaignCard } from './CreateCampaignCard'
 import { useMoralisQuery } from 'react-moralis'
-import { Layout, Row } from 'antd'
+import { Layout, Row, Space, Button } from 'antd'
 import { CampaignCard } from './CampaignCard'
 const { Content } = Layout
 
@@ -31,7 +31,24 @@ export const Main = () => {
 
     return (
         <Content style={{ padding: '0 100px' }}>
-            <CreateCampaignCard />
+            <div
+                style={{
+                    width: "100%",
+                    padding: "20px 0",
+                    display: "flex",
+                    justifyContent: "space-between"
+                }}
+            >
+                <Space>
+                    <Button
+                        type="primary"
+                    >Brows Campaigns</Button>
+                    <Button
+                        type="primary"
+                    >My Donations</Button>
+                </Space>
+                <CreateCampaignCard />
+            </div>
             {campaigns &&
                 <>
                     <h1>Running</h1>
