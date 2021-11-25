@@ -132,7 +132,7 @@ export const CreateCampaignCard = () => {
                                 listType="picture-card"
                                 onChange={(uploader) => setNFTFiles(uploader.fileList)}
                                 beforeUpload
-                                accept={[".png"]}
+                                accept={[".png", ".gif"]}
                             >
                                 {NFTFiles.length < 1 && <div>
                                     <PlusOutlined />

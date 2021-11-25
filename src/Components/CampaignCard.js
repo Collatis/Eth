@@ -24,7 +24,6 @@ export const CampaignCard = ({ data }) => {
 
     const handleDonation = async () => {
         setSubmitLoading(true)
-        console.log("handling donation")
         try {
             let campaign = instanciateContract()
             campaign.options.address = data.attributes.contractAddress
