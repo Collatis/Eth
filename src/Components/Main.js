@@ -1,28 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { CreateCampaignCard } from './CreateCampaignCard'
-import { useMoralisQuery } from 'react-moralis'
-import { Layout, Row, Space, Button } from 'antd'
-import { CampaignCard } from './CampaignCard'
+import { Layout, Space, Button } from 'antd'
+import { CampaignBrowser } from './CampaignBrowser'
 const { Content } = Layout
 
 export const Main = () => {
-
-    const { data: campaigns } = useMoralisQuery(
-        "Campaign",
-        (q) => q.descending("createdAt")
-        ,
-        [],
-        { live: true }
-    )
-
-
-    const checkIfRunning = (c) => {
-        var today = new Date()
-        var timeContractIsOnline = Math.round((today - c.attributes.createdAt) / 1000)
-        if (timeContractIsOnline > c.attributes.campaignDuration)
-            return false
-        return true
-    }
+    const [browsing, setBrowsing] = useState(true)
 
     return (
         <Content style={{ padding: '0 100px' }}>
@@ -36,32 +19,17 @@ export const Main = () => {
             >
                 <Space>
                     <Button
-                        type="primary"
+                        type={browsing && "primary"}
+                        onClick={() => setBrowsing(true)}
                     >Brows Campaigns</Button>
                     <Button
-                        type="primary"
+                        type={!browsing && "primary"}
+                        onClick={() => setBrowsing(false)}
                     >My Donations</Button>
                 </Space>
                 <CreateCampaignCard />
             </div>
-            {campaigns &&
-                <>
-                    <h1>Running</h1>
-                    <Row >
-                        {campaigns.filter(checkIfRunning).map((c, i) => <div style={{ margin: '10px' }}>
-                            <CampaignCard running data={c} />
-                        </div>)}
-                    </Row>
-
-
-                    <h1>Not Running</h1>
-                    <Row >
-                        {campaigns.filter((c) => !checkIfRunning(c)).map((c, i) => <div style={{ margin: '10px' }}>
-                            <CampaignCard data={c} />
-                        </div>)}
-                    </Row>
-                </>
-            }
+            <CampaignBrowser browsing={browsing} />
         </Content >
     )
 }

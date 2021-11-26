@@ -1,12 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import { CampaignABI } from './../contracts/Campaign'
 import { useMoralis } from 'react-moralis'
-import { Card, Input, Button, message, Progress, Row, Col, Modal, Layout, Typography, Descriptions, Space } from 'antd'
+import {
+    Badge,
+    Card,
+    Input,
+    Button,
+    message,
+    Progress,
+    Row,
+    Col,
+    Modal,
+    Layout,
+    Typography,
+    Descriptions
+} from 'antd'
 const { Text, Title } = Typography;
 const { Content } = Layout
 const { Meta } = Card;
 
-export const CampaignCard = ({ data, running }) => {
+export const CampaignCard = ({ data, running, count }) => {
 
     const { user, web3 } = useMoralis();
     const [donationAmount, setDonationAmount] = useState("0.001")
@@ -15,10 +28,10 @@ export const CampaignCard = ({ data, running }) => {
     const [cardLoading, setCardLoading] = useState(false)
     const [countdown, setCountdown] = useState()
     const [balance, setBalance] = useState(1)
-    const [detailedView, setDetailedView] = useState(true)
+    const [detailedView, setDetailedView] = useState(false)
 
     const instanciateContract = (address) => {
-        let contract = new web3.eth.Contract(CampaignABI, data.attributes.contractAddress)
+        let contract = new web3.eth.Contract(CampaignABI, address)
         contract.setProvider(web3.currentProvider)
         contract.options.address = address
         return contract
@@ -53,7 +66,7 @@ export const CampaignCard = ({ data, running }) => {
                 </Input.Group>
             ]
 
-        } else if (user.get("ethAddress") == data.attributes.userAddress) {
+        } else if (user.get("ethAddress") === data.attributes.userAddress) {
             return [
                 <Button
                     type="primary"
@@ -121,6 +134,17 @@ export const CampaignCard = ({ data, running }) => {
         </div>)
     }
 
+    const showCountIfInDonationView = (children) => {
+        if (count)
+            return (
+                <Badge.Ribbon text={count}>
+                    {children}
+                </Badge.Ribbon>
+            )
+        return children
+
+    }
+
     useEffect(() => {
         const syncLoading = async () => {
             setCardLoading(true)
@@ -131,7 +155,7 @@ export const CampaignCard = ({ data, running }) => {
         syncLoading()
     }, [submitLoading, endCampaignLoading])
 
-    return (
+    return showCountIfInDonationView(
         <>
             <Card
                 loading={cardLoading}
