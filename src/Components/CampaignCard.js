@@ -234,7 +234,7 @@ export const CampaignCard = ({ data, running, count }) => {
                                     <Progress
                                         type="circle"
                                         percent={Math.round(balance / data.attributes.campaignGoal * 100)}
-                                        width={"min(100%, 130px)"}
+                                        width={"100px"}
                                     />
                                 </Descriptions.Item>
                             </Descriptions>
