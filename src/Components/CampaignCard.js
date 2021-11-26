@@ -27,6 +27,7 @@ export const CampaignCard = ({ data, running, count }) => {
     const [endCampaignLoading, setEndCampaignLoading] = useState(false)
     const [cardLoading, setCardLoading] = useState(false)
     const [countdown, setCountdown] = useState()
+    const [countdownType, setCountdownType] = useState()
     const [balance, setBalance] = useState(1)
     const [detailedView, setDetailedView] = useState(false)
 
@@ -39,8 +40,20 @@ export const CampaignCard = ({ data, running, count }) => {
 
     const getCountdown = () => {
         const running = (new Date() - data.attributes.createdAt) / 1000
-        const countdown = data.attributes.campaignDuration - running
-        setCountdown(parseFloat(countdown / 60).toFixed(1))
+        let scountdown = data.attributes.campaignDuration - running
+        let type
+        if (scountdown > 86400) {
+            scountdown = (scountdown / 86400).toFixed()
+            type = "Days"
+        } else if (scountdown > 3600) {
+            scountdown = (scountdown / 3600).toFixed()
+            type = "Hours"
+        } else {
+            scountdown = parseFloat(scountdown / 60).toFixed()
+            type = "Minutes"
+        }
+        setCountdown(scountdown)
+        setCountdownType(type)
     }
 
     const getBalance = async () => {
@@ -145,10 +158,17 @@ export const CampaignCard = ({ data, running, count }) => {
 
     }
 
+    const convertCreationDate = () => {
+        const today = new Date()
+        console.log(data.attributes.createdAt);
+
+    }
+
     useEffect(() => {
         const syncLoading = async () => {
             setCardLoading(true)
             getCountdown()
+            convertCreationDate()
             await getBalance()
             setCardLoading(false)
         }
@@ -178,7 +198,7 @@ export const CampaignCard = ({ data, running, count }) => {
                     description={<>
                         <Row justify="space-between">
                             <Col>
-                                <p>Countdown: {countdown} Min.</p>
+                                <p>Countdown: {countdown} {countdownType} left in this campaign.</p>
                                 <p>Balance: {parseFloat(balance).toFixed(2)} USD</p>
                                 <p>Goal: {data.attributes.campaignGoal} USD</p>
                             </Col>
@@ -221,9 +241,11 @@ export const CampaignCard = ({ data, running, count }) => {
                                 title="Campaign Info"
                                 column={2}
                             >
-                                <Descriptions.Item label="Countdown"><b>{countdown} Min.</b></Descriptions.Item>
+                                <Descriptions.Item label="Countdown"><b>{countdown} {countdownType} left in this campaign.</b></Descriptions.Item>
                                 <Descriptions.Item label="Balance"><b>{parseFloat(balance).toFixed(2)} USD</b></Descriptions.Item>
-                                <Descriptions.Item label="Duration"><b>{parseFloat(data.attributes.campaignDuration / 60).toFixed(1)} Min.</b></Descriptions.Item>
+                                <Descriptions.Item label="Creation Date"><b>{data.attributes.createdAt.toLocaleString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</b></Descriptions.Item>
+
+                                {/* <Descriptions.Item label="Duration"><b>{parseFloat(data.attributes.campaignDuration / 60).toFixed(1)} Min.</b></Descriptions.Item> */}
                                 <Descriptions.Item label="Goal"><b>{data.attributes.campaignGoal} USD</b></Descriptions.Item>
                             </Descriptions>
                         </Col>
