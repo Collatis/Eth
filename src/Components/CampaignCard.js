@@ -160,7 +160,9 @@ export const CampaignCard = ({ data, running, count }) => {
             <Card
                 loading={cardLoading}
                 hoverable
-                style={{ width: 400 }}
+                style={{
+                    width: 400
+                }}
                 cover={
                     <div style={{ height: 500, margin: "auto", overflow: "hidden" }}>
                         <img style={{ width: 400 }} alt="nft" src={data.attributes.imageUrl} />
@@ -169,6 +171,9 @@ export const CampaignCard = ({ data, running, count }) => {
                 onClick={() => setDetailedView(true)}
             >
                 <Meta
+                    style={{
+                        height: 240
+                    }}
                     title={data.attributes.cause}
                     description={<>
                         <Row justify="space-between">
@@ -196,7 +201,11 @@ export const CampaignCard = ({ data, running, count }) => {
                 bodyStyle={{ padding: 0 }}
             >
                 <img style={{ width: "100%" }} alt="nft" src={data.attributes.imageUrl} />
-                <Content style={{ padding: '30px min(5vw, 50px)' }}>
+                <Content
+                    style={{
+                        padding: '30px min(5vw, 50px)'
+                    }}
+                >
                     <div
                         style={{ display: "flex", justifyContent: "space-between" }}
                     >
