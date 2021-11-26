@@ -5,6 +5,7 @@ import { Button, Input, Form, Upload, message, Modal } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 
 export const CreateCampaignCard = () => {
+    const [form] = Form.useForm()
     const { Moralis, user, web3 } = useMoralis();
     const { save: saveCampaign } = useNewMoralisObject("Campaign")
     let [showContractMask, setShowContractMask] = useState(false)
@@ -67,6 +68,7 @@ export const CreateCampaignCard = () => {
                 receipientAddress: receipient,
                 contractAddress: instance._address,
                 cause,
+                description,
                 campaignDuration: duration,
                 campaignGoal: goal,
                 nftId: paddedHex,
@@ -75,12 +77,14 @@ export const CreateCampaignCard = () => {
             })
         } catch (error) {
             message.error("Somthing went wrong sorry :(")
-            console.log(error)
+            message.error(error)
             setNFTFiles([])
         }
 
         setSubmitLoading(false)
         setShowContractMask(false)
+        form.resetFields()
+        setNFTFiles([])
     }
 
     return (
@@ -94,7 +98,6 @@ export const CreateCampaignCard = () => {
             <Modal
                 title="Create a Campaign"
                 visible={showContractMask}
-                okButtonProps={{ htmlType: "submit" }}
                 footer={[
                     <Button >Cancel </Button>,
                     <Button type={"primary"} form="createCampaignForm" htmlType="submit" loading={submitLoading}>Ok</Button>
@@ -103,6 +106,7 @@ export const CreateCampaignCard = () => {
                 width={1000}
             >
                 <Form
+                    form={form}
                     id="createCampaignForm"
                     name="basic"
                     labelCol={{ span: 8 }}

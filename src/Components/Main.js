@@ -17,16 +17,11 @@ export const Main = () => {
 
 
     const checkIfRunning = (c) => {
-        if (c.attributes.campaignDuration === undefined) {
-            return false
-        }
         var today = new Date()
         var timeContractIsOnline = Math.round((today - c.attributes.createdAt) / 1000)
-        if (timeContractIsOnline > c.campaignDuration) {
+        if (timeContractIsOnline > c.attributes.campaignDuration)
             return false
-        } else {
-            return true
-        }
+        return true
     }
 
     return (
@@ -53,13 +48,17 @@ export const Main = () => {
                 <>
                     <h1>Running</h1>
                     <Row >
-                        {campaigns.filter(checkIfRunning).map((c, i) => <div style={{ margin: '10px' }}><CampaignCard data={c} /></div>)}
+                        {campaigns.filter(checkIfRunning).map((c, i) => <div style={{ margin: '10px' }}>
+                            <CampaignCard running data={c} />
+                        </div>)}
                     </Row>
 
 
                     <h1>Not Running</h1>
                     <Row >
-                        {campaigns.filter((c) => !checkIfRunning(c)).map((c, i) => <div style={{ margin: '10px' }}><CampaignCard data={c} /></div>)}
+                        {campaigns.filter((c) => !checkIfRunning(c)).map((c, i) => <div style={{ margin: '10px' }}>
+                            <CampaignCard data={c} />
+                        </div>)}
                     </Row>
                 </>
             }
