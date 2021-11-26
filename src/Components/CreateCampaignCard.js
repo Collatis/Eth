@@ -3,6 +3,7 @@ import { CampaignABI, CampaignBytes } from './../contracts/Campaign'
 import { useMoralis, useNewMoralisObject } from 'react-moralis'
 import { Button, Input, Form, Upload, message, Modal } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
+const { TextArea } = Input
 
 export const CreateCampaignCard = () => {
     const [form] = Form.useForm()
@@ -116,34 +117,34 @@ export const CreateCampaignCard = () => {
                     autoComplete="off"
                 >
                     <Form.Item
-                        label="What is the Cause of This Campaign"
+                        label="Campaign Title"
                         name="cause"
                         rules={[{ required: true, message: 'Please input the cause of the Campaign!' }]}>
-                        <Input />
+                        <Input placeholder="Describe your campaign in a short Title" />
                     </Form.Item>
                     <Form.Item
                         label="Descriptions"
                         name="description"
                         rules={[{ required: true, message: 'Please input your description!' }]}>
-                        <Input />
+                        <TextArea placeholder="Describe the details of your campaign here." />
                     </Form.Item>
                     <Form.Item
                         rules={[{ required: true, message: 'Please input the receipient!' }]}
                         label="Set the Adress of the Receipient"
                         name="receipient">
-                        <Input />
+                        <Input placeholder="Ethereum Adress" />
                     </Form.Item>
                     <Form.Item
                         rules={[{ required: true, message: 'Please input your goal!' }]}
                         label="Set the Fianancial Goal of the Campaign"
                         name="goal">
-                        <Input />
+                        <Input placeholder="Dollars" />
                     </Form.Item>
                     <Form.Item
                         rules={[{ required: true, message: 'Please input the duration!' }]}
                         label="Set the Duration of the campaign"
                         name="duration" >
-                        <Input />
+                        <Input placeholder="Days" />
                     </Form.Item>
                     <Form.Item
                         rules={[{ required: true, message: 'Please input your png!' }]}
