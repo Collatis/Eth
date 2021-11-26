@@ -68,7 +68,7 @@ contract Campaign is ERC1155 {
     }
 
     function payout() public {
-        if (getBalance() >= goal | block.timestamp > expiration_date) {
+        if (getBalance() >= goal || block.timestamp > expiration_date) {
             receipient.transfer(address(this).balance);
             emit DonationEnded(receipient, address(this).balance);
         } else if (getBalance() >= goal)
