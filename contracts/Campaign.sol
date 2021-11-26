@@ -1,11 +1,6 @@
-<<<<<<< HEAD
-// SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.7;
-=======
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
->>>>>>> 3594b8634d270845a0812ef0aa11fa305ecc189a
-import "@chainlink/contracts/src/v0.5/interfaces/AggregatorV3Interface.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 contract Campaign is ERC1155 {
@@ -20,6 +15,7 @@ contract Campaign is ERC1155 {
 
     event DonationSend(address donor, uint256 amount, uint256 nftId);
     event DonationEnded(address receipient, uint256 amount);
+    event Transfer(address sender, address receiver, uint256 amount);
 
     constructor(
         uint256 init_duration,
@@ -34,7 +30,7 @@ contract Campaign is ERC1155 {
         set_uri = init_uri;
         expiration_date = block.timestamp + init_duration;
         priceFeed = AggregatorV3Interface(
-            0x9326BFA02ADD2366b30bacB125260Af641031331
+            0x8A753747A1Fa494EC906cE90E9f37563A8AF630e
         );
     }
 
@@ -67,17 +63,19 @@ contract Campaign is ERC1155 {
         ) = priceFeed.latestRoundData();
 
         uint256 balance;
-        balance = uint256(price) * address(this).balance;
+        balance = uint256(price) * (address(this).balance);
         return balance;
     }
 
     function payout() public {
-        if (getBalance() < goal)
+        if (getBalance() >= goal | block.timestamp > expiration_date) {
+            receipient.transfer(address(this).balance);
+            emit DonationEnded(receipient, address(this).balance);
+        } else if (getBalance() >= goal)
             revert("Donation Campaign has not reached its end goal");
-        if (block.timestamp < expiration_date)
+        else if (block.timestamp < expiration_date)
             revert("Donation Campaign has not Ended Yet");
-        emit DonationEnded(receipient, address(this).balance);
-        receipient.transfer(address(this).balance);
+        // emit Transfer(address(this), receipient, address(this).balance);
     }
 
     function uri(uint256 _tokenId)

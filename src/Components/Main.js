@@ -22,7 +22,7 @@ export const Main = () => {
         }
         var today = new Date()
         var timeContractIsOnline = Math.round((today - c.attributes.createdAt) / 1000)
-        if (timeContractIsOnline > c.attributes.campaignDuration) {
+        if (timeContractIsOnline > c.campaignDuration) {
             return false
         } else {
             return true

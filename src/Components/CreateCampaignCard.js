@@ -96,7 +96,7 @@ export const CreateCampaignCard = () => {
                 visible={showContractMask}
                 okButtonProps={{ htmlType: "submit" }}
                 footer={[
-                    <Button >Cancle </Button>,
+                    <Button >Cancel </Button>,
                     <Button type={"primary"} form="createCampaignForm" htmlType="submit" loading={submitLoading}>Ok</Button>
                 ]}
                 onCancel={() => setShowContractMask(false)}
