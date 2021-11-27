@@ -141,14 +141,13 @@ export const CampaignCard = ({ data, running, update }) => {
         </div>)
     }
 
-    const showCountIfInDonationView = (children) => {
+    const showBadges = (children) => {
+        let res = children
+        if (user.get("ethAddress") === data.attributes.userAddress && parseFloat(data.balance) > 0)
+            res = <Badge.Ribbon text={"Payout"} placement={"start"} color={"red"} children={res} />
         if (data.numberOfTokens)
-            return (
-                <Badge.Ribbon text={data.numberOfTokens}>
-                    {children}
-                </Badge.Ribbon>
-            )
-        return children
+            res = <Badge.Ribbon text={data.numberOfTokens} children={res} />
+        return res
 
     }
 
@@ -167,7 +166,7 @@ export const CampaignCard = ({ data, running, update }) => {
         syncLoading()
     }, [submitLoading, endCampaignLoading])
 
-    return showCountIfInDonationView(
+    return showBadges(
         <>
             <Card
                 loading={cardLoading}
