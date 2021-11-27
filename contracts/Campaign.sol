@@ -110,10 +110,10 @@ contract Campaign is ERC1155 {
         return meta_uri;
     }
 
-    function isDonationPhase() public view returns (bool) {
+    function isDonationPhase() public payable returns (bool) {
         return
             block.timestamp < expiration_date &&
-            getDonatedAmount() < goal &&
+            getDonatedAmount() < goal * 10000000000000000000000000 &&
             !paid;
     }
 }

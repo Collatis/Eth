@@ -56,7 +56,7 @@ export const CampaignCard = ({ data, running, update }) => {
     }
 
     const getAction = (cardIsOpened = false) => {
-        if (running && data.balance < data.attributes.campaignGoal) {
+        if (running) {
             return [
                 <Input.Group compact>
                     <Input
@@ -143,7 +143,7 @@ export const CampaignCard = ({ data, running, update }) => {
 
     const showBadges = (children) => {
         let res = children
-        if (user.get("ethAddress") === data.attributes.userAddress && parseFloat(data.balance) > 0)
+        if (user.get("ethAddress") === data.attributes.userAddress && parseFloat(data.balance) > 0 && !running)
             res = <Badge.Ribbon text={"Payout"} placement={"start"} color={"red"} children={res} />
         if (data.numberOfTokens)
             res = <Badge.Ribbon text={data.numberOfTokens} children={res} />
