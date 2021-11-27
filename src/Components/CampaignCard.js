@@ -19,7 +19,7 @@ const { Text, Title } = Typography;
 const { Content } = Layout
 const { Meta } = Card;
 
-export const CampaignCard = ({ data, running, update }) => {
+export const CampaignCard = ({ data, running, update, open }) => {
 
     const { user, web3 } = useMoralis();
     const [donationAmount, setDonationAmount] = useState("0.001")
@@ -28,7 +28,7 @@ export const CampaignCard = ({ data, running, update }) => {
     const [cardLoading, setCardLoading] = useState(false)
     const [countdown, setCountdown] = useState()
     const [countdownType, setCountdownType] = useState()
-    const [detailedView, setDetailedView] = useState(false)
+    const [detailedView, setDetailedView] = useState(open)
 
     const instanciateContract = (address) => {
         let contract = new web3.eth.Contract(CampaignABI, address)
@@ -159,7 +159,7 @@ export const CampaignCard = ({ data, running, update }) => {
     useEffect(() => {
         const syncLoading = async () => {
             setCardLoading(true)
-            update()
+            update(data.attributes.nftId)
             getCountdown()
             setCardLoading(false)
         }

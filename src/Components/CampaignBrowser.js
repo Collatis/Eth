@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useMoralisQuery, useMoralis } from 'react-moralis'
 import { CampaignABI } from './../contracts/Campaign'
-import { Row } from 'antd'
+import { Row, Skeleton } from 'antd'
 import { CampaignCard } from './CampaignCard'
 
 export const CampaignBrowser = ({ browsing }) => {
@@ -15,6 +15,7 @@ export const CampaignBrowser = ({ browsing }) => {
     )
     const [donations, setDonations] = useState([])
     const [update, setUpdate] = useState(false)
+    const [openNFTId, setOpenNFTId] = useState(-1)
 
     const instanciateContract = (address) => {
         let contract = new web3.eth.Contract(CampaignABI, address)
@@ -72,11 +73,22 @@ export const CampaignBrowser = ({ browsing }) => {
                 <Row >
                     {donations.filter((c) => running ? c.isRunning : !c.isRunning).map((c, i) =>
                         <div style={{ margin: '10px' }}>
-                            <CampaignCard running={running} data={c} update={() => setUpdate(!update)} />
+                            <CampaignCard
+                                running={running}
+                                data={c}
+                                open={openNFTId == c.attributes.nftId}
+                                update={(nftId) => {
+                                    setUpdate(!update)
+                                    setOpenNFTId(nftId)
+                                }} />
                         </div>)}
                 </Row>
             </>
         )
+    }
+
+    const showAllCampains = () => {
+        return <> {getCampains(true)}  {getCampains(false)}</>
     }
 
     useEffect(() => {
@@ -85,9 +97,10 @@ export const CampaignBrowser = ({ browsing }) => {
     }, [campaigns, browsing, update])
 
     return (
-        <>
-            {getCampains(true)}
-            {getCampains(false)}
+        <>{donations ?
+            showAllCampains()
+            :
+            <Skeleton />}
         </>
     )
 }
