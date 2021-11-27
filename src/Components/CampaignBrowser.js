@@ -14,6 +14,7 @@ export const CampaignBrowser = ({ browsing }) => {
         { live: true }
     )
     const [donations, setDonations] = useState([])
+    const [update, setUpdate] = useState(false)
 
     const instanciateContract = (address) => {
         let contract = new web3.eth.Contract(CampaignABI, address)
@@ -22,40 +23,57 @@ export const CampaignBrowser = ({ browsing }) => {
         return contract
     }
 
-    const checkIfRunning = (c) => {
-        var today = new Date()
-        var timeContractIsOnline = Math.round((today - c.attributes.createdAt) / 1000)
-        if (timeContractIsOnline > c.attributes.campaignDuration)
-            return false
-        return true
+    const checkNFTs = async (contract, nftId) => {
+        const numberOfNFTs = await contract.methods.balanceOf(user.get("ethAddress"), nftId).call()
+        return parseInt(numberOfNFTs)
     }
 
-    const checkNFTs = async (contractAddress, nftId) => {
-        const numberOfNFTs = await instanciateContract(contractAddress).methods.balanceOf(user.get("ethAddress"), nftId).call()
-        return parseInt(numberOfNFTs)
+    const getBalance = async (campaign) => {
+        const balance = await campaign.methods.getBalance().call()
+        return parseFloat(balance) / 10000000000000000000000000
+    }
+
+    const getRunning = async (campaign) => {
+        return await campaign.methods.isDonationPhase().call()
+    }
+
+    const getDonatedAmount = async (campaign) => {
+        const balance = await campaign.methods.getDonatedAmount().call()
+        return parseFloat(balance) / 10000000000000000000000000
     }
 
     const getAllDonations = async () => {
         let myDonations = []
         for (let campaign_i in campaigns) {
-            const numberOfTokens = await checkNFTs(campaigns[campaign_i].attributes.contractAddress, campaigns[campaign_i].attributes.nftId)
+            let contract = instanciateContract(campaigns[campaign_i].attributes.contractAddress)
+            const numberOfTokens = await checkNFTs(
+                contract,
+                campaigns[campaign_i].attributes.nftId
+            )
+            const donatedAmount = await getDonatedAmount(contract)
+            const isRunning = await getRunning(contract)
+            const balance = await getBalance(contract)
             if (numberOfTokens > 0 || browsing)
                 myDonations.push({
                     attributes: campaigns[campaign_i].attributes,
-                    numberOfTokens
+                    numberOfTokens,
+                    balance,
+                    isRunning,
+                    donatedAmount
                 })
         }
         setDonations(myDonations)
     }
 
-    const getRunning = (running) => {
+    const getCampains = (running) => {
         return (
             <>
                 <h1>{!running && "Not"} Running</h1>
                 <Row >
-                    {donations.filter((c) => running ? checkIfRunning(c) : !checkIfRunning(c)).map((c) => <div style={{ margin: '10px' }}>
-                        <CampaignCard running data={c} count={c.numberOfTokens} />
-                    </div>)}
+                    {donations.filter((c) => running ? c.isRunning : !c.isRunning).map((c, i) =>
+                        <div style={{ margin: '10px' }}>
+                            <CampaignCard running={running} data={c} update={() => setUpdate(!update)} />
+                        </div>)}
                 </Row>
             </>
         )
@@ -64,12 +82,12 @@ export const CampaignBrowser = ({ browsing }) => {
     useEffect(() => {
         if (campaigns)
             getAllDonations()
-    }, [campaigns, browsing])
+    }, [campaigns, browsing, update])
 
     return (
         <>
-            {getRunning(true)}
-            {getRunning(false)}
+            {getCampains(true)}
+            {getCampains(false)}
         </>
     )
 }

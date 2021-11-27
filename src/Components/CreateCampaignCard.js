@@ -30,6 +30,11 @@ export const CreateCampaignCard = () => {
         return contract
     }
 
+    const daysToSeconds = (days) => {
+        const seconds = parseFloat(days) * 60 * 60 * 24
+        return seconds.toString()
+    }
+
     const handleSubmit = async ({ cause, description, duration, goal, receipient }) => {
         setSubmitLoading(true)
         try {
@@ -58,7 +63,7 @@ export const CreateCampaignCard = () => {
             web3.eth.defaultAccount = user.get("ethAddress")
             const instance = await contract.deploy({
                 data: CampaignBytes,
-                arguments: [duration, receipient, goal, paddedHex, meta_url]
+                arguments: [daysToSeconds(duration), receipient, goal, paddedHex, meta_url]
             }).send({
                 from: user.get("ethAddress"),
             })
@@ -70,7 +75,7 @@ export const CreateCampaignCard = () => {
                 contractAddress: instance._address,
                 cause,
                 description,
-                campaignDuration: duration,
+                campaignDuration: daysToSeconds(duration),
                 campaignGoal: goal,
                 nftId: paddedHex,
                 metadataUrl: meta_url,
@@ -78,7 +83,7 @@ export const CreateCampaignCard = () => {
             })
         } catch (error) {
             message.error("Somthing went wrong sorry :(")
-            message.error(error)
+            console.log(error)
             setNFTFiles([])
         }
 

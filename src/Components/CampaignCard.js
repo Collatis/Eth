@@ -19,7 +19,7 @@ const { Text, Title } = Typography;
 const { Content } = Layout
 const { Meta } = Card;
 
-export const CampaignCard = ({ data, running, count }) => {
+export const CampaignCard = ({ data, running, update }) => {
 
     const { user, web3 } = useMoralis();
     const [donationAmount, setDonationAmount] = useState("0.001")
@@ -28,7 +28,6 @@ export const CampaignCard = ({ data, running, count }) => {
     const [cardLoading, setCardLoading] = useState(false)
     const [countdown, setCountdown] = useState()
     const [countdownType, setCountdownType] = useState()
-    const [balance, setBalance] = useState(1)
     const [detailedView, setDetailedView] = useState(false)
 
     const instanciateContract = (address) => {
@@ -56,14 +55,8 @@ export const CampaignCard = ({ data, running, count }) => {
         setCountdownType(type)
     }
 
-    const getBalance = async () => {
-        let campaign = instanciateContract(data.attributes.contractAddress)
-        let sbalance = await campaign.methods.getBalance().call()
-        setBalance(sbalance / 10000000000000000000000000)
-    }
-
     const getAction = (cardIsOpened = false) => {
-        if (running && balance < data.attributes.campaignGoal) {
+        if (running && data.balance < data.attributes.campaignGoal) {
             return [
                 <Input.Group compact>
                     <Input
@@ -79,7 +72,7 @@ export const CampaignCard = ({ data, running, count }) => {
                 </Input.Group>
             ]
 
-        } else if (user.get("ethAddress") === data.attributes.userAddress) {
+        } else if (user.get("ethAddress") === data.attributes.userAddress && parseFloat(data.balance) > 0) {
             return [
                 <Button
                     type="primary"
@@ -103,6 +96,7 @@ export const CampaignCard = ({ data, running, count }) => {
             message.info("Thank you for donating!")
         } catch (error) {
             message.error("Somthing went wrong sorry :(")
+            console.log(error)
         }
         setSubmitLoading(false)
     }
@@ -135,22 +129,22 @@ export const CampaignCard = ({ data, running, count }) => {
                 borderRadius: "5px"
             }}
         >
-            <Text copyable>
-                <b
+            <b
+            >
+                <Text
                     style={{
                         color: "white",
 
-                    }}
-                >{props.children}
-                </b>
-            </Text>
+                    }} copyable>{props.children}
+                </Text>
+            </b>
         </div>)
     }
 
     const showCountIfInDonationView = (children) => {
-        if (count)
+        if (data.numberOfTokens)
             return (
-                <Badge.Ribbon text={count}>
+                <Badge.Ribbon text={data.numberOfTokens}>
                     {children}
                 </Badge.Ribbon>
             )
@@ -158,18 +152,16 @@ export const CampaignCard = ({ data, running, count }) => {
 
     }
 
-    const convertCreationDate = () => {
-        const today = new Date()
-        console.log(data.attributes.createdAt);
-
+    const numberWithCommas = (x) => {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
+
 
     useEffect(() => {
         const syncLoading = async () => {
             setCardLoading(true)
+            update()
             getCountdown()
-            convertCreationDate()
-            await getBalance()
             setCardLoading(false)
         }
         syncLoading()
@@ -187,23 +179,22 @@ export const CampaignCard = ({ data, running, count }) => {
                     <div style={{ height: 500, margin: "auto", overflow: "hidden" }}>
                         <img style={{ width: 400 }} alt="nft" src={data.attributes.imageUrl} />
                     </div>}
-                actions={getAction()}
                 onClick={() => setDetailedView(true)}
             >
                 <Meta
                     style={{
-                        height: 340
+                        height: 240
                     }}
                     title={data.attributes.cause}
                     description={<>
                         <Row justify="space-between">
                             <Col>
-                                <p>Countdown: {countdown} {countdownType} left in this campaign.</p>
-                                <p>Balance: {parseFloat(balance).toFixed(2)} USD</p>
-                                <p>Goal: {data.attributes.campaignGoal} USD</p>
+                                <p>Countdown: {countdown} {countdownType}</p>
+                                <p>Donated: {numberWithCommas(data.donatedAmount.toFixed(2))} USD</p>
+                                <p>Goal: {numberWithCommas(data.attributes.campaignGoal)} USD</p>
                             </Col>
                             <Col>
-                                <Progress type="circle" percent={Math.round(balance / data.attributes.campaignGoal * 100)} width={90} />
+                                <Progress type="circle" percent={Math.round(data.donatedAmount / data.attributes.campaignGoal * 100)} width={90} />
                             </Col>
                         </Row>
                         <br />
@@ -232,7 +223,9 @@ export const CampaignCard = ({ data, running, count }) => {
                         <h1>{data.attributes.cause}</h1>
                         <div
                             style={{ paddingTop: "10px" }}
-                        >{getAction(true)}</div></div>
+                        >{getAction(true)}
+                        </div>
+                    </div>
                     <Row
                         justify="space-between"
                     >
@@ -241,12 +234,10 @@ export const CampaignCard = ({ data, running, count }) => {
                                 title="Campaign Info"
                                 column={2}
                             >
-                                <Descriptions.Item label="Countdown"><b>{countdown} {countdownType} left in this campaign.</b></Descriptions.Item>
-                                <Descriptions.Item label="Balance"><b>{parseFloat(balance).toFixed(2)} USD</b></Descriptions.Item>
-                                <Descriptions.Item label="Creation Date"><b>{data.attributes.createdAt.toLocaleString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</b></Descriptions.Item>
-
-                                {/* <Descriptions.Item label="Duration"><b>{parseFloat(data.attributes.campaignDuration / 60).toFixed(1)} Min.</b></Descriptions.Item> */}
-                                <Descriptions.Item label="Goal"><b>{data.attributes.campaignGoal} USD</b></Descriptions.Item>
+                                <Descriptions.Item label="Countdown"><b>{countdown} {countdownType}</b></Descriptions.Item>
+                                <Descriptions.Item label="Donated"><b>{numberWithCommas(data.donatedAmount.toFixed(2))} USD</b></Descriptions.Item>
+                                <Descriptions.Item label="Creation Date"><b>{data.attributes.createdAt.toLocaleString("en-US", { year: 'numeric', month: 'numeric', day: 'numeric' })}</b></Descriptions.Item>
+                                <Descriptions.Item label="Goal"><b>{numberWithCommas(data.attributes.campaignGoal)} USD</b></Descriptions.Item>
                             </Descriptions>
                         </Col>
                         <Col span={6}>
@@ -255,7 +246,7 @@ export const CampaignCard = ({ data, running, count }) => {
                             ><Descriptions.Item>
                                     <Progress
                                         type="circle"
-                                        percent={Math.round(balance / data.attributes.campaignGoal * 100)}
+                                        percent={Math.round(data.donatedAmount / data.attributes.campaignGoal * 100)}
                                         width={"100px"}
                                     />
                                 </Descriptions.Item>
@@ -294,6 +285,14 @@ export const CampaignCard = ({ data, running, count }) => {
                             </Col>
                             <Col>
                                 <CodeBox>{data.attributes.contractAddress}</CodeBox>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col span={6}>
+                                Current Balance:
+                            </Col>
+                            <Col>
+                                {numberWithCommas(data.balance.toFixed(2))} USD
                             </Col>
                         </Row>
                     </Descriptions>

@@ -2,9 +2,9 @@ import { useEffect } from "react"
 import './App.css'
 import { Main } from "./Components/Main"
 import { useMoralis } from "react-moralis"
-import { Typography, Divider, Layout, Button } from 'antd';
+import { Typography, Layout, Button } from 'antd';
 
-const { Title, Paragraph, Text, Link } = Typography;
+const { Title, Paragraph } = Typography;
 
 function App() {
   const { authenticate, isWeb3Enabled, enableWeb3, isAuthenticated, isWeb3EnableLoading } =
