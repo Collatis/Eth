@@ -54,7 +54,7 @@ export const CreateCampaignCard = () => {
             }
             const metaDataFile = new Moralis.File(
                 `${paddedHex}.json`,
-                { base64: btoa(JSON.stringify(metadata)) })
+                { base64: btoa(unescape(encodeURIComponent(JSON.stringify(metadata)))) })
             await metaDataFile.saveIPFS()
             let meta_url = metaDataFile._ipfs
 
