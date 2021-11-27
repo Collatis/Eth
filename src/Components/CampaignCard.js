@@ -185,6 +185,7 @@ export const CampaignCard = ({ data, running, update, open, browsing }) => {
             getCountdown()
             setCardLoading(false)
         }
+        syncLoading()
     }, [submitLoading, endCampaignLoading])
 
     return showBadges(
