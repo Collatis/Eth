@@ -192,7 +192,7 @@ export const CampaignCard = ({ data, running, count }) => {
             >
                 <Meta
                     style={{
-                        height: 240
+                        height: 340
                     }}
                     title={data.attributes.cause}
                     description={<>
