@@ -71,36 +71,42 @@ export const CampaignBrowser = ({ browsing }) => {
             <>
                 <h1>{!running && "Not"} Running</h1>
                 <Row >
-                    {donations.filter((c) => running ? c.isRunning : !c.isRunning).map((c, i) =>
-                        <div style={{ margin: '10px' }}>
-                            <CampaignCard
-                                running={running}
-                                data={c}
-                                open={openNFTId == c.attributes.nftId}
-                                update={(nftId) => {
-                                    setUpdate(!update)
-                                    setOpenNFTId(nftId)
-                                }} />
-                        </div>)}
+                    {donations.length > 0 ?
+                        donations.filter((c) => running ? c.isRunning : !c.isRunning).map((c, i) =>
+                            <div style={{ margin: '10px' }}>
+                                <CampaignCard
+                                    running={running}
+                                    browsing={browsing}
+                                    data={c}
+                                    open={openNFTId == c.attributes.nftId}
+                                    update={(nftId) => {
+                                        setUpdate(!update)
+                                        setOpenNFTId(nftId)
+                                    }} />
+                            </div>)
+                        :
+                        <>
+                            <Skeleton active />
+                            <Skeleton active />
+                            <Skeleton active />
+                        </>
+                    }
                 </Row>
             </>
         )
     }
 
-    const showAllCampains = () => {
-        return <> {getCampains(true)}  {getCampains(false)}</>
-    }
+
 
     useEffect(() => {
         if (campaigns)
             getAllDonations()
     }, [campaigns, browsing, update])
 
-    return (
-        <>{donations ?
-            showAllCampains()
-            :
-            <Skeleton />}
-        </>
-    )
+    useEffect(() => {
+        setDonations([])
+        setOpenNFTId(-1)
+    }, [browsing])
+
+    return <> {getCampains(true)}  {getCampains(false)}</>
 }

@@ -13,13 +13,14 @@ import {
     Modal,
     Layout,
     Typography,
-    Descriptions
+    Descriptions,
+    Icon
 } from 'antd'
 const { Text, Title } = Typography;
 const { Content } = Layout
 const { Meta } = Card;
 
-export const CampaignCard = ({ data, running, update, open }) => {
+export const CampaignCard = ({ data, running, update, open, browsing }) => {
 
     const { user, web3 } = useMoralis();
     const [donationAmount, setDonationAmount] = useState("0.001")
@@ -59,11 +60,32 @@ export const CampaignCard = ({ data, running, update, open }) => {
         if (running) {
             return [
                 <Input.Group compact>
-                    <Input
-                        style={{ width: cardIsOpened ? "100px" : 'calc(100% - 120px)' }}
-                        defaultValue={donationAmount}
-                        onChange={(e) => setDonationAmount(e.target.value)}
-                    />
+                    <div
+                        style={{
+                            maxWidth: "208px",
+                            margin: "auto",
+                            position: "relative",
+                            display: "inline-block"
+                        }}
+                    >
+                        <Input
+                            style={{ width: cardIsOpened ? "100px" : 'calc(100% - 120px)' }}
+                            defaultValue={donationAmount}
+                            onChange={(e) => setDonationAmount(e.target.value)}
+                        />
+                        <span
+                            style={{
+                                paddingTop: "5px",
+                                position: "absolute",
+                                top: "0",
+                                right: "5px",
+                                zIndex: "9999",
+                                color: "grey"
+                            }}
+                        >
+                            Eth
+                        </span>
+                    </div>
                     <Button
                         type="primary"
                         onClick={handleDonation}
@@ -163,7 +185,6 @@ export const CampaignCard = ({ data, running, update, open }) => {
             getCountdown()
             setCardLoading(false)
         }
-        syncLoading()
     }, [submitLoading, endCampaignLoading])
 
     return showBadges(
@@ -219,7 +240,17 @@ export const CampaignCard = ({ data, running, update, open }) => {
                     <div
                         style={{ display: "flex", justifyContent: "space-between" }}
                     >
-                        <h1>{data.attributes.cause}</h1>
+                        <h1>{data.attributes.cause} {data.donatedAmount > 0 &&
+                            <img
+                                style={{
+                                    width: "25px",
+                                    height: "25px",
+                                    cursor: "pointer",
+                                }}
+                                onClick={() => window.open(`https://testnets.opensea.io/assets/${data.attributes.contractAddress}/${data.attributes.nftId}`)}
+                                alt="opensea"
+                                src={"https://storage.googleapis.com/opensea-static/Logomark/Logomark-Blue.png"}
+                            />}</h1>
                         <div
                             style={{ paddingTop: "10px" }}
                         >{getAction(true)}

@@ -21,9 +21,11 @@ function App() {
         :
         <Layout style={{ margin: "100px 200px", padding: "50px" }}>
           {/* <> */}
-          <Title>Welcome to "InsertCool Name Here"</Title>
+          <Title>Welcome to Donation Project</Title>
           <Paragraph>
-            This project aims to to do good in the world while also giving you the opportunity to participate in the scam that are NFTs.
+            Please connect with MeatMask.
+            MetaMask is a software cryptocurrency wallet used to interact with the Ethereum blockchain. It allows users to access their Ethereum wallet through a browser extension or mobile app, which can then be used to interact with decentralized applications.
+            <a href="https://metamask.io/" />
           </Paragraph>
           <Button style={{ width: "200px", height: "50px" }} onClick={() => authenticate()}>Authenticate</Button>
           {/* </> */}
